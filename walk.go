@@ -145,12 +145,12 @@ func Walk(root string, walkFn WalkFunc) error {
 	return walk(root, walkFn, false)
 }
 
-func WalkNFS(root string, walkFn WalkFunc) error {
+func WalkWithNFSKludge(root string, walkFn WalkFunc) error {
 
 	return walk(root, walkFn, true)
 }
 
-func walk(root string, walkFn WalkFunc, nfs bool) error {
+func walk(root string, walkFn WalkFunc, nfs_kludge bool) error {
 
 	info, err := os.Lstat(root)
 
@@ -160,7 +160,7 @@ func walk(root string, walkFn WalkFunc, nfs bool) error {
 
 	ignore_errno523 := false
 
-	if nfs {
+	if nfs_kludge {
 		ignore_errno523 = true
 	}
 

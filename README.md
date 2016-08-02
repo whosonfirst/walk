@@ -1,5 +1,10 @@
-walk
-====
+# walk
+
+This is a fork of @MichaelTJones' original [walk](https://github.com/MichaelTJones/walk) package.
+
+## The original version
+
+_This is what @MichaelTJones wrote in his original [README.md](https://github.com/MichaelTJones/walk/blob/master/README.md) file:
 
 Fast parallel version of golang filepath.Walk()
 
@@ -15,3 +20,15 @@ a number of goroutines. So, take note of the following:
 3. Because the walkFunc is called concurrently in multiple goroutines, it needs to be careful about what it does with external data to avoid collisions. Results may be printed using fmt, but generally the best plan is to send results over a channel or accumulate counts using a locked mutex.
 
 These issues are illustrated/handled in the simple traversal programs supplied with walk. There is also a test file that is just the tests from filepath in the Go language's standard library. Walk passes these tests when run in single process mode, and passes most of them in concurrent mode (GOMAXPROCS > 1). The problem is not a real problem, but one of the test expecting a specific number of errors to be found based on presumed sequential traversals.
+
+## The changes
+
+### Set number of walkers from runtime.GOMAXPROCS 
+
+This package incorporates @avleen 's [fork](https://github.com/avleen/walk) of the walk package to [set the number of walkers from runtime.GOMAXPROCS ](https://github.com/MichaelTJones/walk/compare/master...avleen:master).
+
+### walk.WalkWithNFSKludge
+
+This introduces a new package function called `WalkWithNFSKludge` that will trap and ignore `readdirent: errno 523` errors which can occur when traversing NFS mounts. You should use this function with caution and your eyes wide open. There is _nothing_ magic happening here. It is a leap of faith that the error in question, which is raised by the operating system, is not really a big deal for the purposes of your application and shouldn't yield a fatal error by the `walk` package.
+
+File under: 🙈
