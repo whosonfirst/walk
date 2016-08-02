@@ -1,10 +1,10 @@
 # walk
 
-This is a fork of @MichaelTJones' original [walk](https://github.com/MichaelTJones/walk) package.
+This is a fork of [MichaelTJones](https://github.com/MichaelTJones)' original [walk](https://github.com/MichaelTJones/walk) package.
 
 ## The original version
 
-_This is what @MichaelTJones wrote in his original [README.md](https://github.com/MichaelTJones/walk/blob/master/README.md) file:
+_This is what [MichaelTJones](https://github.com/MichaelTJones) wrote in his original [README.md](https://github.com/MichaelTJones/walk/blob/master/README.md) file_:
 
 Fast parallel version of golang filepath.Walk()
 
