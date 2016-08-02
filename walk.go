@@ -8,6 +8,7 @@ package walk
 
 import (
 	"errors"
+	"log"
 	"os"
 	"runtime"
 	"sort"
@@ -163,10 +164,6 @@ func Walk(root string, walkFn WalkFunc) error {
 	return ws.firstError
 }
 
-//
-// THE REMAINDER IS UNCHANGED FROM THE ORGINAL GO LIBRARY ORIGINAL
-//
-
 // readDirNames reads the directory named by dirname and returns
 // a sorted list of directory entries.
 func readDirNames(dirname string) ([]string, error) {
@@ -177,11 +174,19 @@ func readDirNames(dirname string) ([]string, error) {
 	names, err := f.Readdirnames(-1)
 	f.Close()
 	if err != nil {
-		return nil, err
+		if err.Error() == "readdirent: errno 523" {
+			log.Printf("got a 523 error for %s, but ignoring\n", dirname)
+		} else {
+			return nil, err
+		}
 	}
 	sort.Strings(names) // omit sort to save 1-2%
 	return names, nil
 }
+
+//
+// THE REMAINDER IS UNCHANGED FROM THE ORGINAL GO LIBRARY ORIGINAL
+//
 
 // A lazybuf is a lazily constructed path buffer.
 // It supports append, reading previously appended bytes,
