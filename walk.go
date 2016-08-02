@@ -45,11 +45,12 @@ type VisitData struct {
 }
 
 type WalkState struct {
-	walkFn     WalkFunc
-	v          chan VisitData // files to be processed
-	active     sync.WaitGroup // number of files to process
-	lock       sync.RWMutex
-	firstError error // accessed using lock
+	walkFn          WalkFunc
+	v               chan VisitData // files to be processed
+	active          sync.WaitGroup // number of files to process
+	lock            sync.RWMutex
+	firstError      error // accessed using lock
+	ignore_errno523 bool
 }
 
 func (ws *WalkState) terminated() bool {
@@ -92,7 +93,7 @@ func (ws *WalkState) visitFile(file VisitData) {
 		return
 	}
 
-	names, err := readDirNames(file.path)
+	names, err := readDirNames(file.path, ws.ignore_errno523)
 	if err != nil {
 		err = ws.walkFn(file.path, file.info, err)
 		if err != nil {
@@ -140,14 +141,33 @@ func (ws *WalkState) visitFile(file VisitData) {
 // order. Walk does not follow symbolic links.
 
 func Walk(root string, walkFn WalkFunc) error {
+
+	return walk(root, walkFn, false)
+}
+
+func WalkNFS(root string, walkFn WalkFunc) error {
+
+	return walk(root, walkFn, true)
+}
+
+func walk(root string, walkFn WalkFunc, nfs bool) error {
+
 	info, err := os.Lstat(root)
+
 	if err != nil {
 		return walkFn(root, nil, err)
 	}
 
+	ignore_errno523 := false
+
+	if nfs {
+		ignore_errno523 = true
+	}
+
 	ws := &WalkState{
-		walkFn: walkFn,
-		v:      make(chan VisitData, 1024),
+		walkFn:          walkFn,
+		v:               make(chan VisitData, 1024),
+		ignore_errno523: ignore_errno523,
 	}
 	defer close(ws.v)
 
@@ -159,6 +179,7 @@ func Walk(root string, walkFn WalkFunc) error {
 	for i := 0; i < walkers; i++ {
 		go ws.visitChannel()
 	}
+
 	ws.active.Wait()
 
 	return ws.firstError
@@ -166,7 +187,7 @@ func Walk(root string, walkFn WalkFunc) error {
 
 // readDirNames reads the directory named by dirname and returns
 // a sorted list of directory entries.
-func readDirNames(dirname string) ([]string, error) {
+func readDirNames(dirname string, ignore_errno523 bool) ([]string, error) {
 	f, err := os.Open(dirname)
 	if err != nil {
 		return nil, err
@@ -174,7 +195,7 @@ func readDirNames(dirname string) ([]string, error) {
 	names, err := f.Readdirnames(-1)
 	f.Close()
 	if err != nil {
-		if err.Error() == "readdirent: errno 523" {
+		if err.Error() == "readdirent: errno 523" && ignore_errno523 {
 			log.Printf("got a 523 error for %s, but ignoring\n", dirname)
 		} else {
 			return nil, err
