@@ -25,10 +25,12 @@ These issues are illustrated/handled in the simple traversal programs supplied w
 
 ### Set number of walkers from runtime.GOMAXPROCS 
 
-This package incorporates @avleen 's [fork](https://github.com/avleen/walk) of the walk package to [set the number of walkers from runtime.GOMAXPROCS ](https://github.com/MichaelTJones/walk/compare/master...avleen:master).
+This package incorporates [avleen](https://github.com/avleen)'s [fork](https://github.com/avleen/walk) of the walk package to [set the number of walkers from runtime.GOMAXPROCS ](https://github.com/MichaelTJones/walk/compare/master...avleen:master).
 
 ### walk.WalkWithNFSKludge
 
-This introduces a new package function called `WalkWithNFSKludge` that will trap and ignore `readdirent: errno 523` errors which can occur when traversing NFS mounts. You should use this function with caution and your eyes wide open. There is _nothing_ magic happening here. It is a leap of faith that the error in question, which is raised by the operating system, is not really a big deal for the purposes of your application and shouldn't yield a fatal error by the `walk` package.
+This introduces a new package function called `WalkWithNFSKludge` that will trap and ignore `readdirent: errno 523` errors which can occur when traversing NFS mounts. You should use this function with caution and your eyes wide open.
+
+There is _nothing_ magic happening here. It is a leap of faith that the error in question, which is raised by the operating system, is not really a big deal for the purposes of your application and shouldn't yield a fatal error by the `walk` package.
 
 File under: 🙈
