@@ -195,8 +195,16 @@ func readDirNames(dirname string, ignore_errno523 bool) ([]string, error) {
 	names, err := f.Readdirnames(-1)
 	f.Close()
 	if err != nil {
+
+		// https://forums.aws.amazon.com/thread.jspa?threadID=233852
+
 		if err.Error() == "readdirent: errno 523" && ignore_errno523 {
 			log.Printf("got a 523 error for %s, but ignoring\n", dirname)
+
+			if names == nil {
+				log.Printf("but seriously... %s is empty, which is maybe weird?\n", dirname)
+				names = make([]string, 0)
+			}
 		} else {
 			return nil, err
 		}
